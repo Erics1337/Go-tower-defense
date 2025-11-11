@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"math"
 	"math/rand"
@@ -569,7 +570,7 @@ func main() {
 }
 
 func createBackground() *ebiten.Image {
-	img := ebiten.NewImage(screenWidth, screenHeight)
+	rgba := image.NewRGBA(image.Rect(0, 0, screenWidth, screenHeight))
 	centerX := float64(screenWidth) / 2
 	centerY := float64(screenHeight) / 2
 	maxDist := math.Hypot(centerX, centerY)
@@ -583,7 +584,7 @@ func createBackground() *ebiten.Image {
 			r := uint8(30 + 120*(1-t))
 			g := uint8(20 + 70*t)
 			b := uint8(80 + 150*(1-t))
-			img.Set(x, y, color.RGBA{R: r, G: g, B: b, A: 255})
+			rgba.Set(x, y, color.RGBA{R: r, G: g, B: b, A: 255})
 		}
 	}
 
@@ -602,17 +603,17 @@ func createBackground() *ebiten.Image {
 					continue
 				}
 				fade := 1 - dist/radius
-				r0, g0, b0, a0 := img.At(x, y).RGBA()
+				r0, g0, b0, a0 := rgba.At(x, y).RGBA()
 				blend := fade * 0.35
 				nr := clamp(float64(r0>>8)+(float64(tint.R)-float64(r0>>8))*blend, 0, 255)
 				ng := clamp(float64(g0>>8)+(float64(tint.G)-float64(g0>>8))*blend, 0, 255)
 				nb := clamp(float64(b0>>8)+(float64(tint.B)-float64(b0>>8))*blend, 0, 255)
-				img.Set(x, y, color.RGBA{uint8(nr), uint8(ng), uint8(nb), uint8(a0 >> 8)})
+				rgba.Set(x, y, color.RGBA{uint8(nr), uint8(ng), uint8(nb), uint8(a0 >> 8)})
 			}
 		}
 	}
 
-	return img
+	return ebiten.NewImageFromImage(rgba)
 }
 
 func drawText(dst *ebiten.Image, value string, x, y int, clr color.Color, scale float64) {
